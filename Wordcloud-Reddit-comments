@@ -1,0 +1,58 @@
+#%%
+# Reddit Project
+#%%
+import pandas as pd
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator # stopwords are added if user requires them
+import praw
+from praw.models import MoreComments
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+#%%
+# read the personal data from files and assign it to relevant variables
+with open('YOUR FILE PATH', 'r') as f:
+    pw = f.read()
+with open('YOUR FILE PATH', 'r') as f:
+    client_id = f.read()
+with open('YOUR FILE PATH', 'r') as f:
+    secret = f.read()
+with open('YOUR FILE PATH', 'r') as f:
+    username = f.read()
+#%%
+# configuring praw
+reddit = praw.Reddit(
+client_id=client_id,
+client_secret=secret,
+password=pw,
+user_agent="FirstBotapp 1.1",
+username=username
+)
+#%%
+def wordcloud_generator():
+    """
+    This function will extract and parse all (or most) of the comments belonging to a single Reddit submission.
+    The function will input the user to provide a Reddit submission link to extract all the comments.
+    Finally, a wordcloud will be generated based on the text gathered from the Reddit  submission."
+
+    """
+
+    url = str(input('Please enter the url.')).lower()
+    submission = reddit.submission(url=url) # obtain a submission object
+    submission.comments.replace_more(limit=None) # returns a list of all the top-level comments, followed by second-level, third-level, etc
+    text = [] # create a list to append the comments
+
+    for comment in submission.comments.list():
+        text.append(comment.body)
+    text = str(text) # convert the list of comments to string
+
+    wordcloud = WordCloud().generate(text) # obtain a wordcloud
+    wordcloud = WordCloud(background_color=None, mode="RGBA", min_word_length=3).generate(text)
+
+    plt.figure(figsize=(15,10))
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+
+    return plt.show()
+#%%
+# call the function
+wordcloud_generator() # will ask for the Reddit url
